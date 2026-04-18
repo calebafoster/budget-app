@@ -1,23 +1,23 @@
-# Replace "your-app-name" with whatever name you choose on Fly
-app = "budget-app"
-primary_region = "ord"
+# fly.toml app configuration file generated for budget-app-srkv1g on 2026-04-18T22:28:43Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'budget-app-srkv1g'
+primary_region = 'sjc'
 
 [build]
 
-[env]
-  DB_PATH = "/data/budget.db"
-
-[[mounts]]
-  source = "budget_data"
-  destination = "/data"
-
-[[http_service]]
+[http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
 
 [[vm]]
-  memory = "256mb"
-  cpu_kind = "shared"
+  memory = '1gb'
+  cpu_kind = 'shared'
   cpus = 1
+  memory_mb = 256
