@@ -1,6 +1,6 @@
 # Replace "your-app-name" with whatever name you choose on Fly
-app = "budget-app"
-primary_region = "ord"
+app = "budget-app-0199"
+primary_region = "sjc"
 
 [build]
 
