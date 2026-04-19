@@ -86,7 +86,6 @@ def add_to_bucket(bucket, amount):
         cur.execute("UPDATE buckets SET total = total + ? WHERE id = ?", (amount, bucket))
     else:
         cur.execute("UPDATE buckets SET total = total + ? WHERE name = ?", (amount, bucket))
-    cur.execute("UPDATE accounts SET total = total - ? WHERE name = 'total'", (amount,))
     conn.commit()
     conn.close()
 
