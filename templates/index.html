@@ -166,7 +166,7 @@
     </form>
 
     <h2>Delete Bucket</h2>
-    <form method="post" action="/delete-bucket" style="margin-bottom:1rem">
+    <form method="post" action="/delete-bucket" style="margin-bottom:1rem" onsubmit="return confirm('Delete this bucket? This cannot be undone.')">
       <div class="field">
         <label>Bucket</label>
         <select name="bucket" required>
