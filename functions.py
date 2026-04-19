@@ -98,6 +98,15 @@ def dump_bucket(bucket_name):
     conn.close()
 
 
+def delete_bucket(bucket_name):
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("UPDATE transactions SET bucket_id = NULL WHERE bucket_id = (SELECT id FROM buckets WHERE name = ?)", (bucket_name,))
+    cur.execute("DELETE FROM buckets WHERE name = ?", (bucket_name,))
+    conn.commit()
+    conn.close()
+
+
 def add_bucket(name, check_percentage=0.0):
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()

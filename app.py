@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from functions import DB_PATH
 from functions import (
     add_transaction, add_deposit, add_bucket, add_to_bucket,
-    move_between_buckets, set_bucket_percentage, set_total, dump_bucket
+    move_between_buckets, set_bucket_percentage, set_total, dump_bucket, delete_bucket
 )
 
 app = Flask(__name__)
@@ -108,6 +108,14 @@ def dump_bucket_route():
     bucket = request.form["bucket"]
     dump_bucket(bucket)
     flash(f'Bucket "{bucket}" cleared.')
+    return redirect(url_for("index"))
+
+
+@app.route("/delete-bucket", methods=["POST"])
+def delete_bucket_route():
+    bucket = request.form["bucket"]
+    delete_bucket(bucket)
+    flash(f'Bucket "{bucket}" deleted.')
     return redirect(url_for("index"))
 
 

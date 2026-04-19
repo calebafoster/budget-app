@@ -30,6 +30,9 @@ a.add_argument("amount", type=float)
 s = subparsers.add_parser("set-total", help="Directly set the account total")
 s.add_argument("amount", type=float)
 
+db = subparsers.add_parser("delete-bucket", help="Delete a bucket")
+db.add_argument("name")
+
 args = parser.parse_args()
 
 if args.command in ("overview", "o", None):
@@ -48,3 +51,5 @@ elif args.command in ("add-to-bucket", "a"):
     add_to_bucket(bucket, args.amount)
 elif args.command == "set-total":
     set_total(args.amount)
+elif args.command == "delete-bucket":
+    delete_bucket(args.name)
