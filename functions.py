@@ -133,5 +133,6 @@ def add_deposit(amount, label=None):
         "INSERT INTO deposits (amount, label) VALUES (?, ?)",
         (amount, label)
     )
+    cur.execute("UPDATE accounts SET total = total + ? WHERE name = 'total'", (amount,))
     conn.commit()
     conn.close()
