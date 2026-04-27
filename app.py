@@ -1,5 +1,6 @@
+import os
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from functions import DB_PATH
 from functions import (
     add_transaction, add_deposit, add_bucket, add_to_bucket,
@@ -8,6 +9,30 @@ from functions import (
 
 app = Flask(__name__)
 app.secret_key = "budget-secret-key"
+
+PASSWORD = os.environ.get("BUDGET_PASSWORD", "changeme")
+
+
+@app.before_request
+def require_login():
+    if request.endpoint not in ("login",) and not session.get("authed"):
+        return redirect(url_for("login"))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        if request.form.get("password") == PASSWORD:
+            session["authed"] = True
+            return redirect(url_for("index"))
+        return render_template("login.html", error="Wrong password.")
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 
 def get_data():
