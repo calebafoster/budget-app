@@ -26,6 +26,7 @@ Personal budgeting app: two front-ends (Flask web + argparse CLI) over one SQLit
 | `buckets` | id, name, total, check_percentage | Envelope-style categories. `check_percentage` is stored per bucket but nothing auto-splits deposits by it yet. |
 | `transactions` | id, name, amount, bucket_id → buckets(id) | Spending log only. |
 | `deposits` | id, amount, label | Deposit log. |
+| `monthly_expenses` | id, name, amount | Recurring flat costs. "Subtract Monthly Expenses" deducts `SUM(amount)` from `accounts.total` in one shot. Rows persist after subtracting; there is no guard against subtracting twice. |
 | `unbucketed` | total (VIEW) | Computed: `accounts.total` − `SUM(buckets.total)`. |
 
 ## Operations
@@ -41,8 +42,11 @@ Each exists as a web route in `app.py` and (mostly) a CLI subcommand in `main.py
 - `set_total(amount)` — directly overwrites `accounts.total`.
 - `dump_bucket(name)` — sets a bucket's total to 0.
 - `delete_bucket(name)` — nulls `bucket_id` on its transactions, then deletes the bucket.
+- `add_monthly_expense(name, amount)` — creates a monthly-expense row.
+- `delete_monthly_expense(name)` — deletes a monthly-expense row by name.
+- `subtract_monthly_expenses()` — subtracts `SUM(amount)` of all monthly expenses from `accounts.total`; returns the amount subtracted.
 
-CLI has no subcommand for `move-between-buckets`, `dump-bucket`, or `set-percentage` parity is partial — the web app is the fuller interface.
+CLI has no subcommand for `move-between-buckets` or `dump-bucket`, and `set-percentage` parity is partial — the web app is the fuller interface.
 
 ## Behavior notes / rough edges
 

@@ -33,6 +33,16 @@ s.add_argument("amount", type=float)
 db = subparsers.add_parser("delete-bucket", help="Delete a bucket")
 db.add_argument("name")
 
+me = subparsers.add_parser("add-monthly-expense", aliases=["me"], help="Add a monthly expense")
+me.add_argument("name")
+me.add_argument("amount", type=float)
+
+dme = subparsers.add_parser("delete-monthly-expense", help="Delete a monthly expense")
+dme.add_argument("name")
+
+subparsers.add_parser("subtract-monthly-expenses",
+                      help="Subtract the sum of all monthly expenses from the account total")
+
 args = parser.parse_args()
 
 if args.command in ("overview", "o", None):
@@ -53,3 +63,10 @@ elif args.command == "set-total":
     set_total(args.amount)
 elif args.command == "delete-bucket":
     delete_bucket(args.name)
+elif args.command in ("add-monthly-expense", "me"):
+    add_monthly_expense(args.name, args.amount)
+elif args.command == "delete-monthly-expense":
+    delete_monthly_expense(args.name)
+elif args.command == "subtract-monthly-expenses":
+    subtracted = subtract_monthly_expenses()
+    print(f"Subtracted {subtracted:.2f} from the account total.")

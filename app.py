@@ -4,7 +4,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from functions import DB_PATH
 from functions import (
     add_transaction, add_deposit, add_bucket, add_to_bucket,
-    move_between_buckets, set_bucket_percentage, set_total, dump_bucket, delete_bucket
+    move_between_buckets, set_bucket_percentage, set_total, dump_bucket, delete_bucket,
+    add_monthly_expense, delete_monthly_expense, subtract_monthly_expenses
 )
 
 app = Flask(__name__)
@@ -52,9 +53,13 @@ def get_data():
     transactions = cur.fetchall()
     cur.execute("SELECT id, amount, label FROM deposits ORDER BY id DESC LIMIT 20")
     deposits = cur.fetchall()
+    cur.execute("SELECT id, name, amount FROM monthly_expenses ORDER BY name")
+    monthly_expenses = cur.fetchall()
+    monthly_expenses_total = sum(row[2] for row in monthly_expenses)
     conn.close()
     return dict(account_total=account_total, buckets=buckets,
-                unbucketed=unbucketed, transactions=transactions, deposits=deposits)
+                unbucketed=unbucketed, transactions=transactions, deposits=deposits,
+                monthly_expenses=monthly_expenses, monthly_expenses_total=monthly_expenses_total)
 
 
 @app.route("/")
@@ -141,6 +146,30 @@ def delete_bucket_route():
     bucket = request.form["bucket"]
     delete_bucket(bucket)
     flash(f'Bucket "{bucket}" deleted.')
+    return redirect(url_for("index"))
+
+
+@app.route("/add-monthly-expense", methods=["POST"])
+def add_monthly_expense_route():
+    name = request.form["name"]
+    amount = float(request.form["amount"])
+    add_monthly_expense(name, amount)
+    flash(f'Monthly expense "{name}" ${amount:.2f} added.')
+    return redirect(url_for("index"))
+
+
+@app.route("/delete-monthly-expense", methods=["POST"])
+def delete_monthly_expense_route():
+    name = request.form["name"]
+    delete_monthly_expense(name)
+    flash(f'Monthly expense "{name}" deleted.')
+    return redirect(url_for("index"))
+
+
+@app.route("/subtract-monthly-expenses", methods=["POST"])
+def subtract_monthly_expenses_route():
+    subtracted = subtract_monthly_expenses()
+    flash(f"Subtracted ${subtracted:.2f} in monthly expenses from the account total.")
     return redirect(url_for("index"))
 
 

@@ -136,3 +136,33 @@ def add_deposit(amount, label=None):
     cur.execute("UPDATE accounts SET total = total + ? WHERE name = 'total'", (amount,))
     conn.commit()
     conn.close()
+
+
+def add_monthly_expense(name, amount):
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO monthly_expenses (name, amount) VALUES (?, ?)",
+        (name, amount)
+    )
+    conn.commit()
+    conn.close()
+
+
+def delete_monthly_expense(name):
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("DELETE FROM monthly_expenses WHERE name = ?", (name,))
+    conn.commit()
+    conn.close()
+
+
+def subtract_monthly_expenses():
+    """Subtract the sum of all monthly expenses from the account total. Returns the amount subtracted."""
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    total = cur.execute("SELECT COALESCE(SUM(amount), 0) FROM monthly_expenses").fetchone()[0]
+    cur.execute("UPDATE accounts SET total = total - ? WHERE name = 'total'", (total,))
+    conn.commit()
+    conn.close()
+    return total
