@@ -5,7 +5,8 @@ from functions import DB_PATH
 from functions import (
     add_transaction, add_deposit, add_bucket, add_to_bucket,
     move_between_buckets, set_bucket_percentage, set_total, dump_bucket, delete_bucket,
-    add_monthly_expense, delete_monthly_expense, subtract_monthly_expenses
+    add_monthly_expense, edit_monthly_expense, delete_monthly_expense,
+    subtract_monthly_expenses
 )
 
 app = Flask(__name__)
@@ -53,18 +54,31 @@ def get_data():
     transactions = cur.fetchall()
     cur.execute("SELECT id, amount, label FROM deposits ORDER BY id DESC LIMIT 20")
     deposits = cur.fetchall()
-    cur.execute("SELECT id, name, amount FROM monthly_expenses ORDER BY name")
-    monthly_expenses = cur.fetchall()
-    monthly_expenses_total = sum(row[2] for row in monthly_expenses)
     conn.close()
     return dict(account_total=account_total, buckets=buckets,
-                unbucketed=unbucketed, transactions=transactions, deposits=deposits,
-                monthly_expenses=monthly_expenses, monthly_expenses_total=monthly_expenses_total)
+                unbucketed=unbucketed, transactions=transactions, deposits=deposits)
+
+
+def get_monthly_expenses_data():
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    account_total = cur.execute("SELECT total FROM accounts WHERE name = 'total'").fetchone()[0]
+    cur.execute("SELECT id, name, amount FROM monthly_expenses ORDER BY name")
+    monthly_expenses = cur.fetchall()
+    conn.close()
+    monthly_expenses_total = sum(row[2] for row in monthly_expenses)
+    return dict(account_total=account_total, monthly_expenses=monthly_expenses,
+                monthly_expenses_total=monthly_expenses_total)
 
 
 @app.route("/")
 def index():
     return render_template("index.html", **get_data())
+
+
+@app.route("/monthly-expenses")
+def monthly_expenses_page():
+    return render_template("monthly_expenses.html", **get_monthly_expenses_data())
 
 
 @app.route("/add-transaction", methods=["POST"])
@@ -155,22 +169,33 @@ def add_monthly_expense_route():
     amount = float(request.form["amount"])
     add_monthly_expense(name, amount)
     flash(f'Monthly expense "{name}" ${amount:.2f} added.')
-    return redirect(url_for("index"))
+    return redirect(url_for("monthly_expenses_page"))
+
+
+@app.route("/edit-monthly-expense", methods=["POST"])
+def edit_monthly_expense_route():
+    expense_id = int(request.form["id"])
+    name = request.form["name"]
+    amount = float(request.form["amount"])
+    edit_monthly_expense(expense_id, name, amount)
+    flash(f'Monthly expense "{name}" updated to ${amount:.2f}.')
+    return redirect(url_for("monthly_expenses_page"))
 
 
 @app.route("/delete-monthly-expense", methods=["POST"])
 def delete_monthly_expense_route():
-    name = request.form["name"]
-    delete_monthly_expense(name)
+    expense_id = int(request.form["id"])
+    name = request.form.get("name", "")
+    delete_monthly_expense(expense_id)
     flash(f'Monthly expense "{name}" deleted.')
-    return redirect(url_for("index"))
+    return redirect(url_for("monthly_expenses_page"))
 
 
 @app.route("/subtract-monthly-expenses", methods=["POST"])
 def subtract_monthly_expenses_route():
     subtracted = subtract_monthly_expenses()
     flash(f"Subtracted ${subtracted:.2f} in monthly expenses from the account total.")
-    return redirect(url_for("index"))
+    return redirect(url_for("monthly_expenses_page"))
 
 
 if __name__ == "__main__":

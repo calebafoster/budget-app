@@ -149,10 +149,32 @@ def add_monthly_expense(name, amount):
     conn.close()
 
 
-def delete_monthly_expense(name):
+def edit_monthly_expense(expense, name, amount):
+    """Update a monthly expense's name and amount. `expense` may be a name or an int id."""
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
-    cur.execute("DELETE FROM monthly_expenses WHERE name = ?", (name,))
+    if isinstance(expense, int):
+        cur.execute(
+            "UPDATE monthly_expenses SET name = ?, amount = ? WHERE id = ?",
+            (name, amount, expense)
+        )
+    else:
+        cur.execute(
+            "UPDATE monthly_expenses SET name = ?, amount = ? WHERE name = ?",
+            (name, amount, expense)
+        )
+    conn.commit()
+    conn.close()
+
+
+def delete_monthly_expense(expense):
+    """Delete a monthly expense. `expense` may be a name or an int id."""
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    if isinstance(expense, int):
+        cur.execute("DELETE FROM monthly_expenses WHERE id = ?", (expense,))
+    else:
+        cur.execute("DELETE FROM monthly_expenses WHERE name = ?", (expense,))
     conn.commit()
     conn.close()
 

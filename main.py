@@ -37,8 +37,13 @@ me = subparsers.add_parser("add-monthly-expense", aliases=["me"], help="Add a mo
 me.add_argument("name")
 me.add_argument("amount", type=float)
 
+eme = subparsers.add_parser("edit-monthly-expense", help="Rename / re-price a monthly expense")
+eme.add_argument("expense", help="Existing expense name or id")
+eme.add_argument("name", help="New name")
+eme.add_argument("amount", type=float, help="New amount")
+
 dme = subparsers.add_parser("delete-monthly-expense", help="Delete a monthly expense")
-dme.add_argument("name")
+dme.add_argument("expense", help="Expense name or id")
 
 subparsers.add_parser("subtract-monthly-expenses",
                       help="Subtract the sum of all monthly expenses from the account total")
@@ -65,8 +70,12 @@ elif args.command == "delete-bucket":
     delete_bucket(args.name)
 elif args.command in ("add-monthly-expense", "me"):
     add_monthly_expense(args.name, args.amount)
+elif args.command == "edit-monthly-expense":
+    expense = int(args.expense) if args.expense.isdigit() else args.expense
+    edit_monthly_expense(expense, args.name, args.amount)
 elif args.command == "delete-monthly-expense":
-    delete_monthly_expense(args.name)
+    expense = int(args.expense) if args.expense.isdigit() else args.expense
+    delete_monthly_expense(expense)
 elif args.command == "subtract-monthly-expenses":
     subtracted = subtract_monthly_expenses()
     print(f"Subtracted {subtracted:.2f} from the account total.")

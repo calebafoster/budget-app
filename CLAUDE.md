@@ -10,7 +10,7 @@ Personal budgeting app: two front-ends (Flask web + argparse CLI) over one SQLit
 | `main.py` | CLI with the same operations (`python main.py <command>`). `overview`/`o` is the default. |
 | `functions.py` | Shared data layer. Every function opens and closes its own `sqlite3` connection. |
 | `budget.db` | SQLite database (committed to the repo). |
-| `templates/` | `index.html` (single-page dashboard + all forms), `login.html`. |
+| `templates/` | `index.html` (dashboard), `monthly_expenses.html` (monthly-expenses page), `login.html`. |
 | `requirements.txt` | `flask`, `gunicorn`. |
 
 ## Environment variables
@@ -43,8 +43,11 @@ Each exists as a web route in `app.py` and (mostly) a CLI subcommand in `main.py
 - `dump_bucket(name)` — sets a bucket's total to 0.
 - `delete_bucket(name)` — nulls `bucket_id` on its transactions, then deletes the bucket.
 - `add_monthly_expense(name, amount)` — creates a monthly-expense row.
-- `delete_monthly_expense(name)` — deletes a monthly-expense row by name.
+- `edit_monthly_expense(expense, name, amount)` — updates name + amount; `expense` may be a name or int id.
+- `delete_monthly_expense(expense)` — deletes a monthly-expense row; `expense` may be a name or int id.
 - `subtract_monthly_expenses()` — subtracts `SUM(amount)` of all monthly expenses from `accounts.total`; returns the amount subtracted.
+
+Monthly expenses have their own page at **`GET /monthly-expenses`** (`templates/monthly_expenses.html`), with per-row inline edit/delete, an add form, and the subtract button. The dashboard only links to it. The web routes key on the row `id`; the CLI keys on name or id.
 
 CLI has no subcommand for `move-between-buckets` or `dump-bucket`, and `set-percentage` parity is partial — the web app is the fuller interface.
 
